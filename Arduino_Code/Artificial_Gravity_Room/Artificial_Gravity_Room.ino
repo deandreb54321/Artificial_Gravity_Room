@@ -1,3 +1,8 @@
+/*
+ * Author: Deandre Baker
+ * Description: The source code for the artificial gravity room project
+ */
+
 // Includes the following libraries
 #include <Servo.h>
 #include <Wire.h>
@@ -8,48 +13,51 @@ Servo servo;
 Accelerometer acc;
 
 // Angle away from vertical perpendicular to the floor
-int angleMax = 170;
-int angleMin = 75;
+const int angleMax = 170;
+const int angleMin = 75;
 int angle = angleMax;
 
-// Global variables
-int servoPin = 9;
-int motorPin = 11;
-int potPin = 0;
+// Pins
+const int servoPin = 9;
+const int motorPin = 11;
+const int potPin = 0;
+
+// Initial potentiometer and motor speed values
 int potVal = 0;
 int motorSpeed = 0;
-bool fail;
 
-// Variables to store acceleration values
+// Global variables
+bool fail;
 double x, y, z;
 double g;
 
 void setup()
 {
-  // Begins serial communication
-  Serial.begin(9600);
-
-  // Connects servo motor to arduino and adjusts angle
+  // Begins serial communication with the computer so the Processing GUI can read the data
+  Serial.begin(9600); 
+  
+  // Connects the servo motor to the Arduino and adjusts the angle
   servo.attach(servoPin);
   servo.write(angleMax);
 
-  // Sets motorPin to output
+  // Sets motorPin as an output pin
   pinMode(motorPin, OUTPUT);
 
-  // Stops program if accelerometer is not detected
+  // Stops the program if the accelerometer is not detected
   if (acc.begin(OSEPP_ACC_SW_ON) != 0)
   {
     Serial.println("Error connecting to accelerometer");
     fail = true;
     return;
   }
+  
   // Sets accelerometer's sensitivity to 16 g
   acc.setSensitivity(ADXL345_RANGE_PM16G);
 }
 
 void loop()
 {
-  // Stops running code if accelerometer is not detected
+  // Stops running the program if accelerometer is not detected
   if (fail)
     return;
 
@@ -62,7 +70,7 @@ void loop()
   // Outputs a pwm signal to the motor based on the reading from the potentiometer
   analogWrite(motorPin, motorSpeed);
 
-  // Reads the acceleration values and returns them in gs
+  // Reads the acceleration values and returns them in units of g
   if (acc.readGs(&x, &y, &z) != 0)
   {
     Serial.println("Failed to read accelerometer");
@@ -101,5 +109,6 @@ void loop()
     servo.write(--angle);
   }
 
+  // Delays program for a hundredth of a second
   delay(10);
 }
